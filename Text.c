@@ -3,46 +3,80 @@
 #include <conio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <ctype.h>
 #define MAX 10000
 
-typedef struct{
-    char ID[10000];
-    char userName[256];
-    char date[256];
-    char tablenumber[256];
-    char choosefood[256];
-    char sum[MAX];
+typedef struct
+{
+   char ID[MAX];
+   char userName[128];	
+   char date[128];
+   char tableNumber[128];
+   char chooseFood[128];
+   char sum[128];
 }CustomerOrderInfo;
 
-int main(){
-    CustomerOrderInfo a[MAX];
-    FILE *filepointer;
-    filepointer = fopen("CustomerOrderInfo.csv", "r");
-    if(filepointer == NULL){
-        printf("ERROR: Could not open");
-        exit(-1);
-    }
-    else{
-        printf("Opening...");
-    }
+typedef struct
+{
+    char ID[MAX];
+    char userName[128];
+    char date[128];
+    char tableNumber[128];
+    char chooseFood[128];
+    char sum[128];
+}CustomerOrderInfoInput;
+
+typedef struct {
+    char number[128];
+    char foodName[128];
+    char prizes[128];
+}FoodMenu;
+
+CustomerOrderInfoInput input(){
+    CustomerOrderInfoInput a;
+        strcpy(a.chooseFood,"2.1/1.2");
+    return a;
+}
+
+void caculateSummary(){
+    char buf[1028],contain1[1028], contain2[1028],*temp1,*temp2,*temp3;
     int i = 0;
-    char buf[MAX], *tmp;
-    while(fgets(buf,sizeof(buf),filepointer) != NULL){
-        tmp = strtok(buf, ",");
-        strcpy(a[i].ID, tmp);
-
-        tmp = strtok(NULL, ",");
-        strcpy(a[i].userName, tmp);
-
-        tmp = strtok(NULL, ",");
-        strcpy(a[i].date, tmp);
-
-        tmp = strtok(NULL, ",");
-        strcpy(a[i].tablenumber, tmp);
-
-        tmp = strtok(NULL, ",");
-        strcpy(a[i].choosefood, tmp);
-
+    int j = 0;
+    bool stage = true;
+    int type = 0;
+    int quantity = 0;
+    int prizes;
+    int sum;
+    strcpy(buf,"1.1/2.2/5.5/6.2");
+    temp1 = strtok(buf,"/");
+    while(i < strlen(temp1)){
+        if (stage == true){
+            strcat(contain1,*(temp1 + i));
+            if(isdigit(*(temp1 + i + 1))){
+                stage = true;
+            }
+            else{
+                stage = false;
+            }
+        }
+        else{
+            j++;
+        }
+        switch(j){
+            case 1:
+                type = atoi(contain1);
+                break;
+            case 2:
+                quantity = atoi(contain1);
+                j = 0;
+                break;
+        }       
         i++;
     }
+}
+
+int main(){
+    caculateSummary();
+    return 0;
 }
