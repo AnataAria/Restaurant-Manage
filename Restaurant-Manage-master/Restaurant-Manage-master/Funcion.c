@@ -3,7 +3,9 @@
 #include <conio.h>
 #include <math.h>
 #include <stdlib.h>
-#define MAX 10000
+#include <ctype.h>
+#include <stdbool.h>
+#define MAX 5000
 
 typedef struct
 {
@@ -30,6 +32,11 @@ typedef struct {
     char foodName[128];
     char prizes[128];
 }FoodMenu;
+
+typedef struct {
+    char contain1[1280];
+    char contain2[1280];
+}ContainTemp;
 
 void foodMenuUpload(FoodMenu a[]){
     FILE *filepointer;
@@ -72,7 +79,7 @@ void searchFood(FoodMenu a[],CustomerOrderInfo b[]){
     }
 }
 
-int idgenarate(CustomerOrderInfo a[]){
+int idgenarate(CustomerOrderInfo a[]){ // return an ID for the customer order(Running OK)
     FILE *filepointer;
     filepointer = fopen("idgenarate.txt", "r");
     if (filepointer == NULL){
@@ -108,7 +115,7 @@ int idgenarate(CustomerOrderInfo a[]){
     return i;
 }
 
-int readHistoryID(){
+int readHistoryID(){ // Read history ID store from file(Running Ok)
     int i = 0;
     FILE *filepointer ;
     filepointer = fopen("idgenarate.txt", "r");
@@ -222,8 +229,71 @@ void backupData(CustomerOrderInfo a[]){
     fclose(filepointer);
 }
 
-void caculateSummary(CustomerOrderInfoInput a[],FoodMenu b[]){
-    
+int caculateSummary(CustomerOrderInfoInput a, FoodMenu b[],CustomerOrderInfo c[]){
+    char buf[MAX],*temp;
+    char contain1[MAX], contain2[MAX],contain3[MAX];
+    int j = 0, k = 0;
+    int foodOrderNumber = 0;
+    int quantity = 0;
+    int foodPrizes = 0;
+    int sum = 0;
+    strcpy(buf,a.chooseFood);
+    temp = strtok(buf, "/"); 
+    strcpy(contain3, temp);
+    for(int i = 0; i < strlen(temp); i++){
+        if(contain3[i] != '.'){
+            char temp2 = contain3[i];
+            contain2[j] = contain3[i];
+            j++;
+            if(i == (strlen(temp) - 1)){
+                quantity = atoi(contain2);
+                sum = sum + (quantity * foodPrizes);
+                foodPrizes = 0;
+                quantity = 0;
+                memset(contain2,0,sizeof(contain2));
+                memset(contain3, 0 ,sizeof(contain3));
+                j = 0;  
+            }            
+        }
+        else{
+            j = 0;
+            foodOrderNumber = atoi(contain2);
+            foodPrizes = atoi(b[foodOrderNumber - 1].prizes);
+            memset(contain2,0,sizeof(contain2));
+        }
+    }
+    temp = strtok(NULL, "/");
+    while(temp != NULL){
+        strcpy(contain3, temp);
+        for(int i = 0; i < strlen(temp); i++){
+            if(contain3[i] != '.'){
+                char temp2 = contain3[i];
+                contain2[j] = contain3[i];
+                j++;
+                if(i == (strlen(temp) - 1)){
+                    quantity = atoi(contain2);
+                    sum = sum + (quantity * foodPrizes);
+                    foodPrizes = 0;
+                    quantity = 0;
+                    strcpy(contain2,"");
+                    strcpy(contain3,"");
+                    j = 0;  
+                }            
+             }
+            else{
+                j = 0;
+                foodOrderNumber = atoi(contain2);
+                foodPrizes = atoi(b[foodOrderNumber - 1].prizes);
+                strcpy(contain2,"");
+            }
+        }
+        temp = strtok(NULL, "/");
+    }
+    char summarize[MAX];
+    sprintf(summarize, "%c" , sum);
+    strcpy(a.sum,summarize);
+    moveData(c, a);
+    return sum;    
 }
 
 int main(){
