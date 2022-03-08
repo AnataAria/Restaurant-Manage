@@ -5,48 +5,73 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdbool.h>
-#define MAX 5000
+#define MAX 1000
 
 typedef struct
 {
-   char ID[MAX];
-   char userName[128];	
-   char date[128];
-   char tableNumber[128];
-   char chooseFood[128];
-   char sum[128];
-}CustomerOrderInfo;
+   char ID[MAX]; // ID or Order ID of customer
+   char userName[128]; //	Name of Customer
+   char date[128]; // Date order created
+   char tableNumber[128]; // Number of table have order 
+   char chooseFood[128]; // Food have order
+   char sum[128]; // Summarized of money
+}CustomerOrderInfo; // This is struct where Customer Order Infomation is upload from file
 
 typedef struct
 {
-    char ID[MAX];
-    char userName[128];
-    char date[128];
-    char tableNumber[128];
-    char chooseFood[128];
-    char sum[128];
-}CustomerOrderInfoInput;
+    char ID[MAX]; // ID or Order ID of customer have inputs
+    char userName[128]; // Name of user have input 
+    char date[128]; // Date order create have input
+    char tableNumber[128]; // Number of table have input
+    char chooseFood[128]; // Food have order
+    char sum[128]; // Summarized of money
+}CustomerOrderInfoInput; // This is struct where Customer Order Info data is upload from UI
 
 typedef struct {
     char number[128];
     char foodName[128];
     char prizes[128];
-}FoodMenu;
+}FoodMenu;  // This is struct where food menu is upload from file 
 
-typedef struct {
-    char contain1[1280];
-    char contain2[1280];
-}ContainTemp;
+void foodMenuUpload(FoodMenu a[]); // Upload food menu from file csv to struct
 
+void backupData(CustomerOrderInfo a[]); //use for backupdata when reading file csv is error
+
+void uploadOnline(CustomerOrderInfo a[]); // upload customer data from file csv to struct
+
+int idgenarate(); // it's used to genarate ID
+
+int readHistoryID(); // Take ID from history of ID
+
+void uploadToFile(CustomerOrderInfo a[],const int count); //Upload data from CustomerOrderInfo to file csv
+
+void moveData(CustomerOrderInfo a[],CustomerOrderInfoInput b); //move data from CustomerOrderInfoInput to CustomerOrderInfo
+
+int calculateSummary(CustomerOrderInfoInput a, FoodMenu b[],CustomerOrderInfo c[]); //calculateSummary of money
+
+void customerInfoInput(char ID[], char userName[],char date[], char tableNumber[],char chooseFood[],char sum[],CustomerOrderInfoInput a);
+//------------------------------------------------------------------------------------------------------------------------------------------
+int main(){
+    CustomerOrderInfo a[MAX];
+    FoodMenu b[MAX];
+    CustomerOrderInfoInput c;
+
+    uploadOnline(a);
+    foodMenuUpload(b);
+
+
+    return 0;
+}
+//-------------------------------------------------------------------------------------------------------------------------------------------
 void foodMenuUpload(FoodMenu a[]){
     FILE *filepointer;
     filepointer = fopen("foodmenu.csv", "r");
     if(filepointer == NULL){
-        printf("Opening file foodmenu.csv failed");
+        printf("\nOpening file foodmenu.csv failed");
         exit(EXIT_FAILURE);
     }
     else{
-        printf("Opening file foodmenu.csv...");
+        printf("\nOpening file foodmenu.csv...");
     }
     char buf[MAX], *temp;
     fgets(buf, sizeof(buf),filepointer);
@@ -63,31 +88,19 @@ void foodMenuUpload(FoodMenu a[]){
 
         i++;
     }
+    printf("\nClosing file foodmenu.csv...");
     fclose(filepointer);
-}
-
-void searchFood(FoodMenu a[],CustomerOrderInfo b[]){
-    FILE *filepointer;
-    FILE *filepointer1;
-    filepointer = fopen("foodmenu.csv", "r");
-    if(filepointer == NULL){
-        printf("Couldn't open file 'foodmenu.csv\n");
-        exit(EXIT_FAILURE);
-    }
-    else{
-        printf("Opening file 'foodmenu.csv'...\n");
-    }
 }
 
 int idgenarate(CustomerOrderInfo a[]){ // return an ID for the customer order(Running OK)
     FILE *filepointer;
     filepointer = fopen("idgenarate.txt", "r");
     if (filepointer == NULL){
-        printf("idgenarate.txt failed to open");
+        printf("\nidgenarate.txt failed to open");
         exit(EXIT_FAILURE);
     }
     else{
-        printf("opening idgenarate.txt...\n");
+        printf("/nOpening idgenarate.txt...\n");
     }
     char temp[MAX];
     fgets(temp, sizeof(temp), filepointer);
@@ -101,6 +114,7 @@ int idgenarate(CustomerOrderInfo a[]){ // return an ID for the customer order(Ru
         fclose(filepointer);
         filepointer = fopen("idgenarate.txt", "w");
         fprintf(filepointer,"%d", i);
+        printf("\nClosing idgenarate.txt...");
         fclose(filepointer);
     }
     else{
@@ -110,6 +124,7 @@ int idgenarate(CustomerOrderInfo a[]){ // return an ID for the customer order(Ru
         fclose(filepointer);
         filepointer = fopen("idgenarate.txt", "w");
         fprintf(filepointer,"%d", i);
+        printf("\nClosing idgenarate.txt...");
         fclose(filepointer);
     }
     return i;
@@ -134,7 +149,8 @@ int readHistoryID(){ // Read history ID store from file(Running Ok)
     else{
         i = atoi(temp);
     }
-
+    printf("\nClosing idgenarate.txt...");
+    fclose(filepointer);
     return i;
 }
 
@@ -143,11 +159,12 @@ void uploadOnline(CustomerOrderInfo a[])
     FILE *filepointer;
     filepointer = fopen("CustomerOrderInfo.csv", "r");
     if (filepointer == NULL){
-        printf("Error opening CSV file\n");
+        printf("\nError opening CSV file");
+        backupData(a);
         exit(EXIT_FAILURE);
     }
     else{
-        printf("Opening...\n");
+        printf("\nOpening CustomerOrderInfo.csv...");
     }
 
     char buf[MAX], *temp;
@@ -174,32 +191,36 @@ void uploadOnline(CustomerOrderInfo a[])
 
         i++;
     }
+    printf("\nClosing CustomerOrderInfo.csv");
     fclose(filepointer);
 }
 
-void uploadToFile(CustomerOrderInfo a[], const int count){ // used if there have something change to struct
+void uploadToFile(CustomerOrderInfo a[], const int count){ // used if there have something change to struct(Working Ok)
     int temp = count;
     FILE *filepointer;
     filepointer = fopen("CustomerOrderInfo.csv", "w");
     if(filepointer == NULL){
         printf("Error: Could not open CustomerOrderInfo.csv");
+        backupData(a);
         exit(EXIT_FAILURE);
     }
     else{
-        printf("Opening CustomerOrderInfo.csv...");
+        printf("\nOpening CustomerOrderInfo.csv...");
     }
 
     int line = 0;
     fprintf(filepointer, "ID,UserName,Date,TableNumber,ChooseFood,Prizes\n");
     while(line <= temp){
-        fprintf(filepointer,"%s,%s,%s,%s,%s,%s\n", a[line].ID,a[line].userName,a[line].date,a[line].tableNumber,a[line].chooseFood,a[line].sum);
+        fprintf(filepointer,"%s,%s,%s,%s,%s,%s,%s\n", a[line].ID,a[line].userName,a[line].date,a[line].tableNumber,a[line].chooseFood,a[line].sum,"");
         line ++;
     }
+    printf("\nClosing CustomerOrderInfo.csv...");
     fclose(filepointer);
 }
 
-void moveData(CustomerOrderInfo a[], CustomerOrderInfoInput b){
+void moveData(CustomerOrderInfo a[], CustomerOrderInfoInput b){ // move data from CustomerOrderInfoInput to CustomerOrderInfo (Working Ok)
     int i = atoi(b.ID);
+    // -------------------------------Funcion work--------------------------------------------------
     strcpy(a[i].ID, b.ID);
     strcpy(a[i].userName, b.userName);
     strcpy(a[i].date, b.date);
@@ -213,11 +234,11 @@ void backupData(CustomerOrderInfo a[]){
     FILE *filepointer;
     filepointer = fopen("CustomerOrderInfoBackup.csv","w");
     if(filepointer == NULL){
-        printf("ERROR: Failed to open CustomerOrderInfoBackup.csv\n");
+        printf("\nERROR: Failed to open CustomerOrderInfoBackup.csv");
         exit(EXIT_FAILURE);
     }
     else{
-        printf("Opening CustomerOrderInfoBackup.csv");
+        printf("\nOpening CustomerOrderInfoBackup.csv");
     }
     fprintf(filepointer, "ID,UserName,Date,TableNumber,ChooseFood,Prizes");
     int count = readHistoryID();
@@ -226,17 +247,18 @@ void backupData(CustomerOrderInfo a[]){
         fprintf(filepointer, "%s,%s,%s,%s,%s,%s,%s\n",a[cout].ID,a[cout].userName,a[cout].date,a[cout].chooseFood,a[cout].sum," " );
         cout ++;
     }
+    printf("\nClosing file CustomerOrderInfoBackup.csv...");
     fclose(filepointer);
 }
 
-int caculateSummary(CustomerOrderInfoInput a, FoodMenu b[],CustomerOrderInfo c[]){
+int calculateSummary(CustomerOrderInfoInput a, FoodMenu b[],CustomerOrderInfo c[]){
     char buf[MAX],*temp;
     char contain1[MAX], contain2[MAX],contain3[MAX];
     int j = 0, k = 0;
-    int foodOrderNumber = 0;
-    int quantity = 0;
+    int foodOrderNumber = 0,quantity = 0;
     int foodPrizes = 0;
     int sum = 0;
+    //------------------------------Funcion work---------------------------------------
     strcpy(buf,a.chooseFood);
     temp = strtok(buf, "/"); 
     strcpy(contain3, temp);
@@ -275,8 +297,8 @@ int caculateSummary(CustomerOrderInfoInput a, FoodMenu b[],CustomerOrderInfo c[]
                     sum = sum + (quantity * foodPrizes);
                     foodPrizes = 0;
                     quantity = 0;
-                    strcpy(contain2,"");
-                    strcpy(contain3,"");
+                    memset(contain2,0,sizeof(contain2));
+                    memset(contain3,0,sizeof(contain3));
                     j = 0;  
                 }            
              }
@@ -284,26 +306,28 @@ int caculateSummary(CustomerOrderInfoInput a, FoodMenu b[],CustomerOrderInfo c[]
                 j = 0;
                 foodOrderNumber = atoi(contain2);
                 foodPrizes = atoi(b[foodOrderNumber - 1].prizes);
-                strcpy(contain2,"");
+                memset(contain2,0,sizeof(contain2));
             }
         }
         temp = strtok(NULL, "/");
     }
-    char summarize[MAX];
+    sum = sum * atoi(a.tableNumber);
+    char summarize[1080];
     sprintf(summarize, "%c" , sum);
     strcpy(a.sum,summarize);
     moveData(c, a);
     return sum;    
 }
 
-int main(){
-    FoodMenu a[MAX];
-    CustomerOrderInfo b[MAX];
-    foodMenuUpload(a);
-    uploadOnline(b);
-    
-    return 0;
+void customerInfoInput(char ID[], char userName[],char date[], char tableNumber[],char chooseFood[],char sum[],CustomerOrderInfoInput a){
+    strcpy(a.ID,ID);
+    strcpy(a.userName,userName);
+    strcpy(a.date,date);
+    strcpy(a.tableNumber,tableNumber);
+    strcpy(a.chooseFood,chooseFood);
+    strcpy(a.sum,sum);
 }
+
 
 
 
