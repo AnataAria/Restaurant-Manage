@@ -325,7 +325,6 @@ void customerInfoInput(char ID[], char userName[],char date[], char tableNumber[
     strcpy(a.date,date);
     strcpy(a.tableNumber,tableNumber);
     strcpy(a.chooseFood,chooseFood);
-    strcpy(a.sum,sum);
 }
 
 
